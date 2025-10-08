@@ -1,0 +1,383 @@
+﻿@model IEnumerable<ST10442835_CLDV6212_POE.Models.Order>
+@{
+    ViewData["Title"] = "Orders";
+}
+
+<style>
+    body {
+        background-color: #0d0d0d; /* dark black */
+        color: #e0e0e0; /* soft white text */
+    }
+
+    h2 {
+        color: #e0e0e0; /* white heading */
+        font-weight: 700;
+    }
+
+    /* Buttons */
+    .btn-primary {
+        background-color: #1a1a1a;
+        border: none;
+        font-weight: 600;
+        color: #e0e0e0;
+    }
+
+        .btn-primary:hover {
+            background-color: #0f0f0f;
+            color: #a0d8ff !important; /* subtle light blue hover */
+        }
+
+    .btn-outline-primary {
+        border-color: #a0d8ff;
+        color: #a0d8ff;
+    }
+
+        .btn-outline-primary:hover {
+            background-color: #a0d8ff;
+            color: #0d0d0d;
+        }
+
+    .btn-outline-info {
+        border-color: #5bc0de;
+        color: #5bc0de;
+    }
+
+        .btn-outline-info:hover {
+            background-color: #5bc0de;
+            color: #0d0d0d;
+        }
+
+    .btn-outline-warning {
+        border-color: #aaa;
+        color: #aaa;
+    }
+
+        .btn-outline-warning:hover {
+            background-color: #aaa;
+            color: #0d0d0d;
+        }
+
+    .btn-outline-danger {
+        border-color: #888;
+        color: #888;
+    }
+
+        .btn-outline-danger:hover {
+            background-color: #888;
+            color: #0d0d0d;
+        }
+
+    /* Table */
+    .table {
+        background-color: #1a1a1a;
+        border-radius: 8px;
+        overflow: hidden;
+    }
+
+        .table thead {
+            background-color: #222;
+            color: #e0e0e0;
+            text-transform: uppercase;
+            font-weight: 600;
+        }
+
+    .table-hover tbody tr:hover {
+        background-color: #2a2a2a;
+    }
+
+    /* Alerts */
+    .alert-info {
+        background-color: #1a1a1a;
+        border: 1px solid #444;
+        color: #e0e0e0;
+    }
+
+        .alert-info .alert-link {
+            color: #a0d8ff;
+            font-weight: 600;
+        }
+
+    /* Modal */
+    .modal-content {
+        background-color: #1a1a1a;
+        color: #e0e0e0;
+        border: 1px solid #444;
+    }
+
+    .modal-header {
+        border-bottom: 1px solid #444;
+    }
+
+    .modal-footer {
+        border-top: 1px solid #444;
+    }
+
+    /* Status Badges */
+    .badge {
+        font-size: 0.9rem;
+        padding: 0.4em 0.6em;
+        border-radius: 5px;
+    }
+
+    .bg-primary {
+        background-color: #a0d8ff !important;
+        color: #0d0d0d;
+    }
+
+    .bg-info {
+        background-color: #5bc0de !important;
+        color: #0d0d0d;
+    }
+
+    .bg-success {
+        background-color: #28a745 !important;
+        color: #fff;
+    }
+
+    .bg-danger {
+        background-color: #888 !important;
+        color: #0d0d0d;
+    }
+
+    .bg-secondary {
+        background-color: #6c757d !important;
+        color: #fff;
+    }
+
+    i.fas {
+        color: #a0d8ff; /* subtle light blue icons */
+    }
+</style>
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2><i class="fas fa-shopping-cart"></i> Orders</h2>
+    <a asp-action="Create" class="btn btn-primary shadow">
+        <i class="fas fa-plus"></i> Add Order
+    </a>
+</div>
+
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        <i class="fas fa-check-circle"></i> @TempData["Success"]
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="alert"></button>
+    </div>
+}
+
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        <i class="fas fa-exclamation-circle"></i> @TempData["Error"]
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="alert"></button>
+    </div>
+}
+
+@if (Model.Any())
+{
+    <div class="table-responsive shadow">
+        <table class="table table-striped table-hover text-white">
+            <thead>
+                <tr>
+                    <th>Order ID</th>
+                    <th>Customer ID</th>
+                    <th>Product</th>
+                    <th>Order Date</th>
+                    <th>Quantity</th>
+                    <th>Total Price</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var order in Model.OrderByDescending(o => o.OrderDateUtc))
+                {
+                    <tr>
+                        <td><code>@order.OrderId.Substring(0, 8)...</code></td>
+                        <td><small class="text-muted">@order.CustomerId.Substring(0, 8)...</small></td>
+                        <td>@order.ProductName</td>
+                        <td>@order.OrderDateUtc.ToString("MMM dd, yyyy")</td>
+                        <td>@order.Quantity</td>
+                        <td>@order.TotalPrice.ToString("C")</td>
+                        <td>
+                            <span class="badge bg-@(GetStatusBadgeClass(order.Status))">
+                                @order.Status
+                            </span>
+                        </td>
+                        <td>
+                            <div class="btn-group" role="group">
+                                <a asp-action="Details" asp-route-id="@order.RowKey" class="btn btn-sm btn-outline-info" title="Details">
+                                    <i class="fas fa-eye"></i>
+                                </a>
+                                <a asp-action="Edit" asp-route-id="@order.RowKey" class="btn btn-sm btn-outline-primary" title="Edit">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+
+                                <!-- Status Update Dropdown -->
+                                @if (order.Status != "Completed" && order.Status != "Cancelled")
+                                {
+                                    <div class="btn-group" role="group">
+                                        <button type="button" class="btn btn-sm btn-outline-warning dropdown-toggle" data-bs-toggle="dropdown" title="Update Status">
+                                            <i class="fas fa-sync-alt"></i>
+                                        </button>
+                                        <ul class="dropdown-menu bg-dark border border-secondary">
+                                            @if (order.Status == "Submitted")
+                                            {
+                                                <li>
+                                                    <a class="dropdown-item text-light" href="#" onclick="updateOrderStatus('@order.RowKey', 'Processing')">
+                                                        <i class="fas fa-cog text-info"></i> Mark as Processing
+                                                    </a>
+                                                </li>
+                                            }
+                                            @if (order.Status == "Processing")
+                                            {
+                                                <li>
+                                                    <a class="dropdown-item text-light" href="#" onclick="updateOrderStatus('@order.RowKey', 'Completed')">
+                                                        <i class="fas fa-check text-success"></i> Mark as Completed
+                                                    </a>
+                                                </li>
+                                            }
+                                            <li>
+                                                <a class="dropdown-item text-light" href="#" onclick="updateOrderStatus('@order.RowKey', 'Cancelled')">
+                                                    <i class="fas fa-times text-danger"></i> Cancel Order
+                                                </a>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                }
+
+                                <button type="button" class="btn btn-sm btn-outline-danger" onclick="confirmDelete('@order.RowKey', '@order.OrderId')" title="Delete">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}
+else
+{
+    <div class="alert alert-info shadow">
+        <i class="fas fa-info-circle"></i> No orders found.
+        <a asp-action="Create" class="alert-link">Create your first order</a>!
+    </div>
+}
+
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content shadow-lg">
+            <div class="modal-header">
+                <h5 class="modal-title text-danger">Confirm Delete</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                Are you sure you want to delete order <strong id="orderId" class="text-danger"></strong>?
+                <br><small class="text-muted">This action cannot be undone.</small>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <form id="deleteForm" method="post" style="display: inline;">
+                    @Html.AntiForgeryToken()
+                    <button type="submit" class="btn btn-danger">
+                        <i class="fas fa-trash"></i> Delete
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@{
+    string GetStatusBadgeClass(string status) => status?.ToLower() switch
+    {
+        "submitted" => "primary",
+        "processing" => "info",
+        "completed" => "success",
+        "cancelled" => "danger",
+        _ => "secondary"
+    };
+}
+
+@section Scripts {
+    <script>
+        function confirmDelete(orderRowKey, orderId) {
+            document.getElementById('orderId').textContent = orderId.substring(0, 8) + '...';
+            document.getElementById('deleteForm').action = '/Order/Delete/' + orderRowKey;
+            new bootstrap.Modal(document.getElementById('deleteModal')).show();
+        }
+
+        function updateOrderStatus(orderRowKey, newStatus) {
+            if (!orderRowKey || !newStatus) {
+                alert("Invalid order or status");
+                return;
+            }
+
+            const confirmMessage = newStatus === 'Cancelled'
+                ? 'Are you sure you want to cancel this order? This action cannot be undone.'
+                : `Are you sure you want to change the status to "${newStatus}"?`;
+
+            if (confirm(confirmMessage)) {
+                // Show loading state
+                const event = new CustomEvent('showLoading', { detail: 'Updating status...' });
+                document.dispatchEvent(event);
+
+                fetch('/Order/UpdateOrderStatus', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
+                    },
+                    body: JSON.stringify({ id: orderRowKey, newStatus: newStatus })
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    if (data.success) {
+                        // Show success message and reload
+                        const successEvent = new CustomEvent('showSuccess', { detail: data.message });
+                        document.dispatchEvent(successEvent);
+                        setTimeout(() => location.reload(), 1000);
+                    } else {
+                        throw new Error(data.message);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    const errorEvent = new CustomEvent('showError', { detail: 'An error occurred while updating the status: ' + error.message });
+                    document.dispatchEvent(errorEvent);
+                });
+            }
+        }
+
+        // Add global event listeners for notifications
+        document.addEventListener('showLoading', (e) => {
+            // You could implement a loading spinner here
+            console.log('Loading:', e.detail);
+        });
+
+        document.addEventListener('showSuccess', (e) => {
+            alert('Success: ' + e.detail);
+        });
+
+        document.addEventListener('showError', (e) => {
+            alert('Error: ' + e.detail);
+        });
+
+        // Auto-dismiss alerts after 5 seconds
+        document.addEventListener('DOMContentLoaded', function() {
+            const alerts = document.querySelectorAll('.alert-dismissible');
+            alerts.forEach(alert => {
+                setTimeout(() => {
+                    const bsAlert = new bootstrap.Alert(alert);
+                    bsAlert.close();
+                }, 5000);
+            });
+        });
+    </script>
+}
